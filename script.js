@@ -144,7 +144,6 @@ socket.on('updateUsersList', (users) => {
                 <span>📍 ${user.location}</span>
             </div>
             <button class="private-btn" onclick="openPrivateChat('${user.name}')">🔒 محادثة خاصة</button>
-         sensory`;
         
         activeUsersList.appendChild(userCard);
     });
