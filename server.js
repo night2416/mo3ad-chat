@@ -64,6 +64,34 @@ io.on('connection', (socket) => {
         }
     });
 
+        // 🔒 1. استقبال الرسائل النصية الخاصة الثنائية وتوجيهها للشخص المستهدف فقط
+    socket.on('sendPrivateMessage', (data) => {
+        // البحث عن معرف اتصال الشخص المستهدف (target) في قائمة المشتركين النشطين
+        const targetSocket = Object.values(activeUsers).find(user => user.name === data.target);
+        
+        if (targetSocket) {
+            // إرسال الرسالة حصراً للشخص المستهدف دون بقية أعضاء الشات
+            io.to(targetSocket.id).emit('receivePrivateMessage', {
+                text: data.text,
+                sender: data.sender
+            });
+        }
+    });
+
+    // 📎 2. استقبال الصور الخاصة الثنائية وتوجيهها للشخص المستهدف فقط
+    socket.on('sendPrivateImage', (data) => {
+        // البحث عن معرف اتصال الشخص المستهدف (target) في قائمة المشتركين النشطين
+        const targetSocket = Object.values(activeUsers).find(user => user.name === data.target);
+        
+        if (targetSocket) {
+            // إرسال ملف الصورة حصراً للشخص المستهدف لضمان الخصوصية التامة
+            io.to(targetSocket.id).emit('receivePrivateImage', {
+                image: data.image,
+                sender: data.sender
+            });
+        }
+    });
+
     // 🚪 معالجة خروج أو قطع اتصال المستخدم من الشات
     socket.on('disconnect', () => {
         if (activeUsers[socket.id]) {

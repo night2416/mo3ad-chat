@@ -179,9 +179,23 @@ function openPrivateChat(name) {
         return;
     }
     if (!isSubscribed) {
-        paywall.style.display = 'flex';
+        // إظهار جدار الدفع إذا كان المستخدم غير مشترك
+        document.getElementById('paywall').style.display = 'flex';
     } else {
-        alert(`جاري فتح محادثة خاصة وسرية مشفرة مع: ${name}`);
+        // تعيين الشخص المستهدف للمحادثة الثنائية
+        currentPrivateTarget = name;
+        
+        // جلب عناصر النافذة المنبثقة وتحديث البيانات
+        const popup = document.getElementById('private-chat-window');
+        const popupTitle = document.getElementById('popup-target-name');
+        const popupMessages = document.getElementById('popup-messages');
+        
+        popupTitle.textContent = name; // عرض اسم الشخص في أعلى النافذة
+        popupMessages.innerHTML = ''; // تنظيف الشاشة استعداداً لعرض رسائل هذا الشخص فقط
+        popup.style.display = 'flex'; // إظهار النافذة المنبثقة فوراً
+        
+        // إشعار نظام السيرفر لفتح أو جلب تاريخ المحادثة الثنائية السرية
+        console.log(`جاري بدء محادثة ثنائية مشفرة وسرية مع: ${name}`);
     }
 }
 
@@ -202,4 +216,149 @@ function closePaywall() { paywall.style.display = 'none'; }
 
 messageInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') handleSend();
+});
+// متغيرات لتتبع حالة المحادثة الخاصة المنبثقة حالياً
+let currentPrivateTarget = null;
+
+// دالة إغلاق النافذة المنبثقة للخاص
+function closePrivatePopup() {
+    const popup = document.getElementById('private-chat-window');
+    popup.style.display = 'none';
+    currentPrivateTarget = null;
+}
+
+// دالة التكبير والتصغير بمقدار الضعف
+function toggleMaximizePopup() {
+    const popup = document.getElementById('private-chat-window');
+    const maxBtn = document.getElementById('popup-maximize-btn');
+    
+    // التبديل بين إضافة وحذف كلاس التكبير
+    popup.classList.toggle('maximized');
+    
+    // تغيير شكل الأيقونة بناءً على الحالة
+    if (popup.classList.contains('maximized')) {
+        maxBtn.textContent = '🔽'; // أيقونة لتبين أنه سيصغر عند الضغط
+    } else {
+        maxBtn.textContent = '🔲'; // أيقونة لتبين أنه سيكبر عند الضغط
+    }
+}
+
+// دالة تشغيل واختيار الصور عند الضغط على دبوس النافذة المنبثقة
+function triggerPopupFile() {
+    document.getElementById('popup-file-input').click();
+}
+
+// معالجة اختصار زر الـ Enter لإرسال الرسائل داخل الخاص
+function handlePopupKey(e) {
+    if (e.key === 'Enter') {
+        sendPopupMessage();
+    }
+}
+// دالة إرسال الرسائل النصية من النافذة المنبثقة الخاصة
+function sendPopupMessage() {
+    const popupInput = document.getElementById('popup-msg-input');
+    const text = popupInput.value.trim();
+    
+    // التأكد من وجود نص واختيار شخص مستهدف للمحادثة
+    if (text !== "" && currentPrivateTarget) {
+        // إرسال الرسالة عبر حدث خاص جديد للمحادثات الثنائية
+        socket.emit('sendPrivateMessage', {
+            text: text,
+            sender: myProfile.name,
+            target: currentPrivateTarget
+        });
+        
+        // عرض الرسالة فوراً في صندوق الخاص بي (كمرسل)
+        const popupMessages = document.getElementById('popup-messages');
+        const myMsg = document.createElement('div');
+        myMsg.className = 'msg msg-me';
+        myMsg.innerHTML = `<span>${text}</span><span class="msg-time">الآن</span>`;
+        popupMessages.appendChild(myMsg);
+        
+        // تفريغ حقل الإدخال والتمرير لأسفل
+        popupInput.value = "";
+        popupMessages.scrollTop = popupMessages.scrollHeight;
+    }
+}
+
+// استقبال الرسائل الخاصة الثنائية من السيرفر وعرضها في النافذة المنبثقة
+socket.on('receivePrivateMessage', (data) => {
+    // التأكد من أن النافذة مفتوحة حالياً مع نفس الشخص المرسل
+    // أو فتح النافذة تلقائياً إذا كانت مغلقة لكي لا تفوتك الرسالة
+    if (!currentPrivateTarget || currentPrivateTarget !== data.sender) {
+        currentPrivateTarget = data.sender;
+        const popup = document.getElementById('private-chat-window');
+        const popupTitle = document.getElementById('popup-target-name');
+        popupTitle.textContent = data.sender;
+        document.getElementById('popup-messages').innerHTML = ''; // تنظيف الشاشة للمحادثة الجديدة
+        popup.style.display = 'flex';
+    }
+    
+    // عرض رسالة الطرف الآخر داخل صندوق الرسائل المنبثق
+    const popupMessages = document.getElementById('popup-messages');
+    const otherMsg = document.createElement('div');
+    otherMsg.className = 'msg msg-other';
+    otherMsg.innerHTML = `<span class="msg-sender">${data.sender} (خاص 🔒)</span><span>${data.text}</span><span class="msg-time">الآن</span>`;
+    
+    popupMessages.appendChild(otherMsg);
+    popupMessages.scrollTop = popupMessages.scrollHeight; // التمرير التلقائي لأسفل
+});
+
+// دالة معالجة الصورة المحددة من الدبوس المنبثق وتحويلها وقراءتها فوراً
+function handlePopupImage(event) {
+    const file = event.target.files[0];
+    if (file && currentPrivateTarget) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imageData = e.target.result; // ملف الصورة بصيغة Base64
+            
+            // 1. إرسال الصورة عبر حدث مخصص للمحادثة الثنائية الخاصة
+            socket.emit('sendPrivateImage', {
+                image: imageData,
+                sender: myProfile.name,
+                target: currentPrivateTarget
+            });
+            
+            // 2. عرض الصورة فوراً في شاشتي المنبثقة أنا (كمرسل)
+            const popupMessages = document.getElementById('popup-messages');
+            const myImgMsg = document.createElement('div');
+            myImgMsg.className = 'msg msg-me';
+            myImgMsg.innerHTML = `
+                <img src="${imageData}" class="popup-shared-img" alt="صورة مرفقة">
+                <span class="msg-time">الآن</span>
+            `;
+            popupMessages.appendChild(myImgMsg);
+            popupMessages.scrollTop = popupMessages.scrollHeight; // تمرير لأسفل
+        };
+        reader.readAsDataURL(file);
+        
+        // تفريغ الحقل لضمان إمكانية رفع نفس الصورة مجدداً إن لزم الأمر
+        document.getElementById('popup-file-input').value = '';
+    }
+}
+
+// استقبال الصور الخاصة القادمة من الطرف الآخر وعرضها في الشاشة المنبثقة
+socket.on('receivePrivateImage', (data) => {
+    // فتح النافذة تلقائياً باسم المرسل إذا كانت مغلقة أو مع شخص آخر
+    if (!currentPrivateTarget || currentPrivateTarget !== data.sender) {
+        currentPrivateTarget = data.sender;
+        const popup = document.getElementById('private-chat-window');
+        const popupTitle = document.getElementById('popup-target-name');
+        popupTitle.textContent = data.sender;
+        document.getElementById('popup-messages').innerHTML = ''; 
+        popup.style.display = 'flex';
+    }
+    
+    // عرض الصورة داخل صندوق الخاص المستلم
+    const popupMessages = document.getElementById('popup-messages');
+    const otherImgMsg = document.createElement('div');
+    otherImgMsg.className = 'msg msg-other';
+    otherImgMsg.innerHTML = `
+        <span class="msg-sender">${data.sender} (صورة خاصة 🔒)</span>
+        <img src="${data.image}" class="popup-shared-img" alt="صورة مستلمة">
+        <span class="msg-time">الآن</span>
+    `;
+    
+    popupMessages.appendChild(otherImgMsg);
+    popupMessages.scrollTop = popupMessages.scrollHeight; // تمرير تلقائي لأسفل
 });

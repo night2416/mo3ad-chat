@@ -153,5 +153,83 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
+    <!-- صندوق المحادثة الخاصة المنبثق الذكي -->
+<div id="private-chat-window" class="private-popup" style="display: none;">
+    <div class="popup-header">
+        <div class="popup-user-info">
+            <span class="popup-dot">🟢</span>
+            <span id="popup-target-name">اسم المستخدم</span>
+        </div>
+        <div class="popup-controls">
+            <!-- زر التكبير والتصغير المزدوج -->
+            <button id="popup-maximize-btn" onclick="toggleMaximizePopup()">🔲</button>
+            <!-- زر الإغلاق -->
+            <button onclick="closePrivatePopup()">❌</button>
+        </div>
+    </div>
+    
+    <!-- منطقة عرض رسائل الخاص والصور المتبادلة -->
+    <div id="popup-messages" class="popup-messages-area"></div>
+    
+    <!-- صندوق الإدخال المطور مع أيقونة الدبوس المخصصة للصور -->
+    <div class="popup-input-area">
+        <button id="popup-pin-btn" type="button" onclick="triggerPopupFile()">📎</button>
+        <input type="file" id="popup-file-input" accept="image/*" style="display: none;" onchange="handlePopupImage(event)">
+        
+        <input type="text" id="popup-msg-input" placeholder="اكتب رسالة خاصة سرية..." onkeypress="handlePopupKey(event)">
+        <button id="popup-send-btn" onclick="sendPopupMessage()">إرسال</button>
+    </div>
+</div>
+
+<!-- التنسيقات الخاصة بالشاشة المنبثقة والتحكم بأبعادها وتكبيرها -->
+<style>
+    .private-popup {
+        position: fixed;
+        bottom: 20px;
+        left: 20px; /* تظهر في الزاوية السفلى المعاكسة للقائمة الجانبية */
+        width: 320px;
+        height: 420px;
+        background-color: white;
+        border-radius: 12px 12px 0 0;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        z-index: 90;
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    /* ستايل التكبير المخصص لمضاعفة الحجم */
+    .private-popup.maximized {
+        width: 640px; /* ضعف الحجم الأصلي */
+        height: 600px;
+    }
+    .popup-header {
+        background-color: #10b981; /* لون أخضر مميز للخاص */
+        color: white;
+        padding: 10px 15px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+    .popup-user-info { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 14px; }
+    .popup-controls { display: flex; gap: 8px; }
+    .popup-controls button { background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 2px; }
+    .popup-messages-area { flex: 1; padding: 15px; overflow-y: auto; background-color: #f9fafb; display: flex; flex-direction: column; gap: 10px; }
+    .popup-input-area { padding: 10px; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; background-color: white; align-items: center; }
+    .popup-input-area input { flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 20px; outline: none; font-size: 13px; }
+    #popup-pin-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 4px; }
+    #popup-send-btn { background-color: #10b981; color: white; border: none; padding: 7px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px; }
+    
+    /* تنسيق الصور المرفقة داخل صندوق الخاص الجديد */
+    .popup-shared-img {
+        max-width: 100%;
+        max-height: 180px;
+        border-radius: 8px;
+        margin-top: 4px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+</style>
 </body>
 </html>
