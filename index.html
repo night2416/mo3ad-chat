@@ -41,9 +41,80 @@
         .paywall-price { font-size: 24px; font-weight: bold; color: #10b981; margin: 15px 0; }
         .pay-btn { background-color: #f59e0b; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; }
         .close-pay-btn { background-color: #e5e7eb; color: #4b5563; border: none; padding: 8px; border-radius: 6px; margin-top: 10px; cursor: pointer; width: 100%; }
+
+                /* تزيينات شاشة تسجيل الدخول الكاملة الجديدة */
+        .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #4f46e5; display: flex; justify-content: center; align-items: center; z-index: 200; overflow-y: auto; padding: 20px; }
+        .login-box { background-color: white; padding: 30px; border-radius: 16px; max-width: 420px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 14px; }
+        .login-box h2 { margin: 0; text-align: center; color: #374151; font-size: 22px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 13px; font-weight: bold; color: #4b5563; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #4f46e5; }
+        .gender-group { display: flex; gap: 15px; margin-top: 5px; }
+        .gender-option { flex: 1; text-align: center; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s; background-color: #f9fafb; }
+        .gender-option.selected-male { background-color: #dbeafe; color: #1e40af; border-color: #3b82f6; }
+        .gender-option.selected-female { background-color: #fce7f3; color: #9d174d; border-color: #ec4899; }
+        .avatar-preview { width: 80px; height: 80px; border-radius: 50%; background-color: #e5e7eb; margin: 0 auto; display: flex; justify-content: center; align-items: center; border: 2px dashed #9ca3af; overflow: hidden; position: relative; }
+        .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .login-btn { background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; transition: background 0.2s; }
+        .login-btn:hover { background-color: #059669; }
+        .error-msg { color: #ef4444; font-size: 13px; font-weight: bold; text-align: center; display: none; background-color: #fee2e2; padding: 8px; border-radius: 6px; border: 1px solid #fca5a5; }
     </style>
 </head>
 <body>
+
+    <div class="login-overlay" id="login-screen">
+        <div class="login-box">
+            <h2>👋 أهلاً بك في شات موعد</h2>
+            <p style="text-align: center; color: #6b7280; font-size: 13px; margin: 0;">يرجى ملء بياناتك الشخصية للتعارف والدخول إلى الدردشة الحية</p>
+            
+            <div class="error-msg" id="login-error">هذا الاسم مستخدم حالياً، يرجى اختيار اسم آخر!</div>
+
+            <div class="form-group">
+                <label>صورة الملف الشخصي (اختياري)</label>
+                <div class="avatar-preview" id="avatar-preview-box">
+                    <span id="avatar-placeholder" style="font-size: 24px; color: #9ca3af;">👤</span>
+                    <img id="avatar-img" src="" style="display: none;">
+                </div>
+                <input type="file" id="user-avatar" accept="image/*" style="display: none;">
+                <button type="button" onclick="document.getElementById('user-avatar').click()" style="background-color: #e5e7eb; color: #374151; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; width: max-content; margin: 5px auto 0 auto; font-weight: bold;">اختيار صورة</button>
+            </div>
+
+            <div class="form-group">
+                <label>الاسم المستعار أو الحقيقي</label>
+                <input type="text" id="reg-name" placeholder="اكتب اسمك هنا..." required>
+            </div>
+
+            <div class="form-group">
+                <label>الجنس</label>
+                <div class="gender-group">
+                    <div class="gender-option" id="gender-male" onclick="selectGender('ذكر')">👨 ذكر</div>
+                    <div class="gender-option" id="gender-female" onclick="selectGender('أنثى')">👩 أنثى</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>العمر</label>
+                <input type="number" id="reg-age" placeholder="مثال: 25" min="18" max="99" required>
+            </div>
+
+            <div class="form-group">
+                <label>محل السكن أو الإقامة</label>
+                <select id="reg-location">
+                    <option value="بغداد">بغداد</option>
+                    <option value="أربيل">أربيل</option>
+                    <option value="البصرة">البصرة</option>
+                    <option value="الموصل">الموصل</option>
+                    <option value="النجف">النجف</option>
+                    <option value="كربلاء">كربلاء</option>
+                    <option value="السليمانية">السليمانية</option>
+                    <option value="كركوك">كركوك</option>
+                </select>
+            </div>
+
+            <button class="login-btn" onclick="submitLogin()">دخول الشات المباشر 🚀</button>
+        </div>
+    </div>
 
     <header>
         <h1>💬 شات موعد</h1>
@@ -57,13 +128,7 @@
 
     <div class="main-container">
         <main class="chat-area">
-            <div class="messages" id="chat-messages">
-                <div class="msg msg-other">
-                    <span class="msg-sender">أحمد (مشترك ✨)</span>
-                    <span>أهلاً بك في شات موعد! هل ترغب في دخول الغرفة الخاصة؟</span>
-                    <span class="msg-time">03:00 م</span>
-                </div>
-            </div>
+            <div class="messages" id="chat-messages"></div>
             <div class="input-area">
                 <input type="text" id="msg-input" placeholder="اكتب رسالتك هنا...">
                 <button onclick="handleSend()">إرسال</button>
@@ -72,29 +137,7 @@
 
         <aside class="sidebar">
             <div class="sidebar-title">المتواجدون في الغرفة العامة</div>
-            <div class="users-list">
-                <div class="user-card premium">
-                    <div class="user-header">
-                        <span class="user-name premium-text">أحمد (مشترك ✨)</span>
-                        <span class="badge premium-badge">👑 تاج</span>
-                    </div>
-                    <div class="user-info">
-                        <span>👨‍💼 ذكر</span> • <span>🎂 28 سنة</span> • <span>📍 بغداد</span> • <span>❤️ رومانسي</span>
-                    </div>
-                    <button class="private-btn" onclick="openPrivateChat('أحمد')">🔒 محادثة خاصة</button>
-                </div>
-
-                <div class="user-card">
-                    <div class="user-header">
-                        <span class="user-name">سارة</span>
-                        <span class="badge">عضو</span>
-                    </div>
-                    <div class="user-info">
-                        <span>👩‍💼 أنثى</span> • <span>🎂 24 سنة</span> • <span>📍 أربيل</span> • <span>☕ تعارف هادئ</span>
-                    </div>
-                    <button class="private-btn" onclick="openPrivateChat('سارة')">🔒 محادثة خاصة</button>
-                </div>
-            </div>
+            <div class="users-list" id="active-users-list"></div>
         </aside>
     </div>
 
@@ -108,8 +151,7 @@
         </div>
     </div>
 
-    <!-- استدعاء ملف البرمجة الذكي الخارجي لمنع المشاكل -->
-     <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
