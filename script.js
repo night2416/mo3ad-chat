@@ -77,14 +77,12 @@ function submitLogin() {
 // استقبال رد السيرفر بعد فحص الاسم
 socket.on('loginResponse', (response) => {
     if (response.success) {
-        // إذا كان الاسم متاحاً، نخفي شاشة الدخول ونعرض الشات الحي
         loginScreen.style.display = 'none';
         loginError.style.display = 'none';
     } else {
-        // إذا كان الاسم مكرراً، نظهر التنبيه الأحمر للمستخدم
         loginError.textContent = response.message;
         loginError.style.display = 'block';
-        loginScreen.scrollTop = 0; // لرفع الشاشة للأعلى لرؤية التنبيه
+        loginScreen.scrollTop = 0;
     }
 });
 
@@ -144,6 +142,7 @@ socket.on('updateUsersList', (users) => {
                 <span>📍 ${user.location}</span>
             </div>
             <button class="private-btn" onclick="openPrivateChat('${user.name}')">🔒 محادثة خاصة</button>
+        `;
         
         activeUsersList.appendChild(userCard);
     });
