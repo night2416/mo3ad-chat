@@ -159,7 +159,7 @@ socket.on('updateUsersList', (users) => {
 // دالة التبديل بين اللوحات الجانبية في السايدبار الديناميكي
 function switchSidebar(panelName) {
     const sidebar = document.getElementById('dynamic-sidebar');
-    const panels = ['panel-users', 'panel-rooms'];
+    const panels = ['panel-users', 'panel-rooms', 'panel-private']; // أضفنا لوحة الخاص هنا بشكل آمن
     
     panels.forEach(id => {
         const p = document.getElementById(id);
@@ -218,12 +218,16 @@ function sendPopupMessage() {
             myMsg.innerHTML = `<span>${text}</span><span class="msg-time">الآن</span>`;
             popupMessages.appendChild(myMsg);
             popupMessages.scrollTop = popupMessages.scrollHeight;
+            
+            // أرشفة الرسالة التي أرسلتها في الذاكرة الشخصية وتحديث القائمة فوراً
+            privateHistory[currentPrivateTarget] = popupMessages.innerHTML;
+            updateActivePrivateChatsList();
         }
         popupInput.value = "";
     }
 }
 
-// استقبال الرسائل الخاصة الثنائية وعرضها فوراً
+// استقبال الرسائل الخاصة الثنائية وعرضها وأرشفتها فوراً
 socket.on('receivePrivateMessage', (data) => {
     if (!currentPrivateTarget || currentPrivateTarget !== data.sender) {
         currentPrivateTarget = data.sender;
@@ -242,6 +246,10 @@ socket.on('receivePrivateMessage', (data) => {
         otherMsg.innerHTML = `<span class="msg-sender">${data.sender} (خاص 🔒)</span><span>${data.text}</span><span class="msg-time">الآن</span>`;
         popupMessages.appendChild(otherMsg);
         popupMessages.scrollTop = popupMessages.scrollHeight;
+        
+        // أرشفة الرسالة المستلمة في الذاكرة الشخصية وتحديث القائمة فوراً
+        privateHistory[data.sender] = popupMessages.innerHTML;
+        updateActivePrivateChatsList();
     }
 });
 
@@ -273,7 +281,7 @@ function handlePopupImage(event) {
     }
 }
 
-// استقبال الصور الخاصة وعرضها في الصندوق العائم
+// استقبال الصور الخاصة وعرضها في الصندوق العائم وأرشفتها في الذاكرة
 socket.on('receivePrivateImage', (data) => {
     if (!currentPrivateTarget || currentPrivateTarget !== data.sender) {
         currentPrivateTarget = data.sender;
@@ -292,6 +300,10 @@ socket.on('receivePrivateImage', (data) => {
         otherImgMsg.innerHTML = `<span class="msg-sender">${data.sender} (🔒 صورة)</span><img src="${data.image}" class="popup-shared-img"><span class="msg-time">الآن</span>`;
         popupMessages.appendChild(otherImgMsg);
         popupMessages.scrollTop = popupMessages.scrollHeight;
+        
+        // أرشفة الصورة المستلمة في الذاكرة الشخصية وتحديث القائمة فوراً
+        privateHistory[data.sender] = popupMessages.innerHTML;
+        updateActivePrivateChatsList();
     }
 });
 
@@ -369,4 +381,55 @@ if (messageInput) {
     messageInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') handleSend();
     });
+}
+
+// مصفوفة ذكية لتخزين تاريخ الرسائل الخاصة لكل مستخدم طوال الجلسة
+let privateHistory = {};
+
+// دالة لتحديث قائمة الأسخاص النشطين في سايدبار الخاص
+function updateActivePrivateChatsList() {
+    const privateListContainer = document.getElementById('active-private-chats');
+    if (!privateListContainer) return;
+    
+    privateListContainer.innerHTML = ''; // تنظيف القائمة القديمة
+    
+    // جلب أسماء الأشخاص الذين بينك وبينهم تاريخ رسائل
+    Object.keys(privateHistory).forEach(chatName => {
+        const chatItem = document.createElement('div');
+        chatItem.className = 'room-item';
+        chatItem.style.display = 'flex';
+        chatItem.style.justifyContent = 'space-between';
+        chatItem.style.alignItems = 'center';
+        
+        chatItem.innerHTML = `
+            <span onclick="reloadPrivateChatFromSidebar('${chatName}')" style="cursor: pointer; flex: 1;">💬 ${chatName}</span>
+            <span onclick="deletePrivateChatHistory('${chatName}')" style="cursor: pointer; color: #ef4444; font-weight: bold; padding: 0 5px;">✖</span>
+        `;
+        privateListContainer.appendChild(chatItem);
+    });
+}
+
+// إعادة فتح محادثة قديمة واسترجاع رسائلها المخزنة بالكامل
+function reloadPrivateChatFromSidebar(name) {
+    currentPrivateTarget = name;
+    const popup = document.getElementById('private-chat-window');
+    const popupTitle = document.getElementById('popup-target-name');
+    const popupMessages = document.getElementById('popup-messages');
+    
+    if (popupTitle) popupTitle.textContent = name;
+    if (popupMessages) {
+        // إعادة طباعة الرسائل والصور القديمة من الذاكرة الشخصية
+        popupMessages.innerHTML = privateHistory[name] || '';
+        popupMessages.scrollTop = popupMessages.scrollHeight;
+    }
+    if (popup) popup.style.display = 'flex';
+}
+
+// دالة حذف محادثة خاصة من الأرشيف والقائمة
+function deletePrivateChatHistory(name) {
+    if (confirm(`هل تريد مسح وحذف محادثة ${name} من القائمة النشطة؟`)) {
+        delete privateHistory[name];
+        updateActivePrivateChatsList();
+        if (currentPrivateTarget === name) closePrivatePopup();
+    }
 }

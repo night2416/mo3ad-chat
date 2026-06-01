@@ -157,6 +157,7 @@
             <!-- 🏪 الشريط السفلي المطور الثابت المماثل لصورك -->
             <div class="footer-control-bar">
                 <button class="footer-btn" onclick="switchSidebar('users')">👥 المتواجدون (<span id="users-count">0</span>)</button>
+                <button class="footer-btn" onclick="switchSidebar('private')">💬 محادثات نشطة</button>
                 <button class="footer-btn" onclick="switchSidebar('rooms')">🏢 الغرف</button>
                 <button class="footer-btn" onclick="switchSidebar('paywall')">💳 تفعيل المتميز</button>
             </div>
@@ -170,6 +171,14 @@
                 <div class="users-list" id="active-users-list"></div>
             </div>
 
+            <!-- قائمة المحادثات الخاصة النشطة (المضافة حديثاً) -->
+            <div id="panel-private" class="sidebar-panel" style="display: none;">
+                <div class="sidebar-panel-header">💬 محادثات خاصة نشطة <span class="close-panel" onclick="closeSidebar()">✖</span></div>
+                <div class="users-list" id="active-private-chats">
+                    <!-- سيتم توليد أسماء الأشخاص الذين كلمتهم هنا تلقائياً عبر الجافا سكريبت -->
+                </div>
+            </div>
+
             <!-- قائمة الغرف العامة -->
             <div id="panel-rooms" class="sidebar-panel" style="display: none;">
                 <div class="sidebar-panel-header">🏢 غرف الدردشة العامة <span class="close-panel" onclick="closeSidebar()">✖</span></div>
@@ -178,7 +187,6 @@
                 <div class="room-item" onclick="alert('سيتم فتح بقية الغرف بالنسخة النهائية')">☕ غرفة الشباب (3)</div>
             </div>
         </div>
-    </div>
 
     <!-- 🔒 صندوق الخاص المطور العائم (الدبوس 📎 والتكبير 🔲) -->
     <div id="private-chat-window" class="private-popup" style="display: none;">
