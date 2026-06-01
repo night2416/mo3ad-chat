@@ -267,16 +267,33 @@ function handlePopupKey(e) {
 // دالة إرسال الرسائل النصية من النافذة المنبثقة الخاصة
 function sendPopupMessage() {
     const popupInput = document.getElementById('popup-msg-input');
+    if (!popupInput) return;
+    
     const text = popupInput.value.trim();
     
     // التأكد من وجود نص واختيار شخص مستهدف للمحادثة
     if (text !== "" && currentPrivateTarget) {
-        // إرسال الرسالة عبر حدث خاص جديد للمحادثات الثنائية
+        // إرسال الرسالة عبر حدث خاص للمحادثات الثنائية
         socket.emit('sendPrivateMessage', {
             text: text,
             sender: myProfile.name,
             target: currentPrivateTarget
         });
+        
+        // عرض الرسالة فوراً في صندوق الخاص بي (كمرسل)
+        const popupMessages = document.getElementById('popup-messages');
+        if (popupMessages) {
+            const myMsg = document.createElement('div');
+            myMsg.className = 'msg msg-me';
+            myMsg.innerHTML = `<span>${text}</span><span class="msg-time">الآن</span>`;
+            popupMessages.appendChild(myMsg);
+            popupMessages.scrollTop = popupMessages.scrollHeight;
+        }
+        
+        // تفريغ حقل الإدخال
+        popupInput.value = "";
+    }
+}
         
         // عرض الرسالة فوراً في صندوق الخاص بي (كمرسل)
         const popupMessages = document.getElementById('popup-messages');

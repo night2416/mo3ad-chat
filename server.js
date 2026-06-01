@@ -92,6 +92,33 @@ io.on('connection', (socket) => {
         }
     });
 
+        // 🔒 استقبال الرسائل النصية الخاصة الثنائية وتوجيهها للشخص المستهدف
+    socket.on('sendPrivateMessage', (data) => {
+        // البحث عن معرف اتصال الشخص المستهدف (target) في قائمة المتصلين
+        const targetSocket = Object.values(activeUsers).find(user => user.name === data.target);
+        
+        if (targetSocket) {
+            // إرسال الرسالة حصراً للشخص المستهدف دون بقية أعضاء الشات
+            io.to(targetSocket.id).emit('receivePrivateMessage', {
+                text: data.text,
+                sender: data.sender
+            });
+        }
+    });
+
+    // 📎 استقبال الصور الخاصة الثنائية وتوجيهها للشخص المستهدف
+    socket.on('sendPrivateImage', (data) => {
+        const targetSocket = Object.values(activeUsers).find(user => user.name === data.target);
+        
+        if (targetSocket) {
+            // إرسال ملف الصورة حصراً للشخص المستهدف لضمان الخصوصية
+            io.to(targetSocket.id).emit('receivePrivateImage', {
+                image: data.image,
+                sender: data.sender
+            });
+        }
+    });
+
     // 🚪 معالجة خروج أو قطع اتصال المستخدم من الشات
     socket.on('disconnect', () => {
         if (activeUsers[socket.id]) {
