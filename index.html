@@ -126,20 +126,113 @@
         <div class="room-tab private-locked" id="tab-private" onclick="switchRoom('private')">🔒 الغرفة الخاصة (مشتركين فقط ✨)</div>
     </div>
 
-    <div class="main-container">
-        <main class="chat-area">
-            <div class="messages" id="chat-messages"></div>
-            <div class="input-area">
-                <input type="text" id="msg-input" placeholder="اكتب رسالتك هنا...">
-                <button onclick="handleSend()">إرسال</button>
-            </div>
-        </main>
-
-        <aside class="sidebar">
-            <div class="sidebar-title">المتواجدون في الغرفة العامة</div>
-            <div class="users-list" id="active-users-list"></div>
-        </aside>
+   <!-- حاوية الشات الرئيسية المحدثة -->
+<div class="main-container">
+    <div class="chat-area">
+        <div class="messages" id="chat-messages">
+            <!-- الرسائل العامة تظهر هنا -->
+        </div>
+        
+        <!-- منطقة الإدخال العامة -->
+        <div class="input-area">
+            <input type="text" id="msg-input" placeholder="اكتب رسالتك هنا...">
+            <button id="send-btn">إرسال</button>
+        </div>
+        
+        <!-- 🏪 شريط الأزرار السفلي الثابت الجديد المماثل للصور -->
+        <div class="footer-control-bar">
+            <button class="footer-btn" onclick="switchSidebar('users')">👥 المتواجدون (<span id="users-count">0</span>)</button>
+            <button class="footer-btn" onclick="switchSidebar('private')">💬 خاص</button>
+            <button class="footer-btn" onclick="switchSidebar('rooms')">🏢 الغرف</button>
+            <button class="footer-btn" onclick="switchSidebar('settings')">⚙️ الضبط</button>
+        </div>
     </div>
+
+    <!-- السايدبار الجانبي الديناميكي المتغير -->
+    <div class="sidebar" id="dynamic-sidebar">
+        <!-- 1. واجهة المتواجدين -->
+        <div id="panel-users" class="sidebar-panel">
+            <div class="sidebar-panel-header">🟢 المتواجدون <span class="close-panel" onclick="closeSidebar()">✖</span></div>
+            <div class="users-list" id="active-users-list"></div>
+        </div>
+
+        <!-- 2. واجهة المحادثات الخاصة النشطة -->
+        <div id="panel-private" class="sidebar-panel" style="display: none;">
+            <div class="sidebar-panel-header">🔒 المحادثات الخاصة <span class="close-panel" onclick="closeSidebar()">✖</span></div>
+            <div class="users-list" id="active-private-chats">
+                <!-- قائمة بأسماء الأشخاص الذين كلمتهم خاص مع زر حذف -->
+            </div>
+        </div>
+
+        <!-- 3. واجهة قائمة الغرف -->
+        <div id="panel-rooms" class="sidebar-panel" style="display: none;">
+            <div class="sidebar-panel-header">🏢 غرف الدردشة العامة <span class="close-panel" onclick="closeSidebar()">✖</span></div>
+            <div class="rooms-list-container">
+                <div class="room-item active" onclick="changePublicRoom('الغرفة العامة 1')">🏠 الغرفة العامة (1)</div>
+                <div class="room-item" onclick="changePublicRoom('غرفة بنوتة 2')">🎀 غرفة بنوتة (2)</div>
+                <div class="room-item" onclick="changePublicRoom('غرفة الشباب 3')">☕ غرفة الشباب (3)</div>
+            </div>
+        </div>
+
+        <!-- 4. واجهة الضبط والإعدادات -->
+        <div id="panel-settings" class="sidebar-panel" style="display: none;">
+            <div class="sidebar-panel-header">⚙️ إعدادات الحساب <span class="close-panel" onclick="closeSidebar()">✖</span></div>
+            <div class="settings-form" style="padding: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <label style="font-weight: bold; font-size: 13px;">الحالة الشخصية:</label>
+                <input type="text" id="status-input" placeholder="اكتب حالتك هنا..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+                <button onclick="saveStatus()" style="background-color: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- التنسيقات الجديدة للشريط السفلي والقوائم الديناميكية الجانبية -->
+<style>
+    .footer-control-bar {
+        background-color: #111827;
+        display: flex;
+        justify-content: space-around;
+        padding: 8px;
+        border-top: 1px solid #374151;
+    }
+    .footer-btn {
+        background: none;
+        border: none;
+        color: #d1d5db;
+        font-weight: bold;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+    .footer-btn:hover { background-color: #374151; color: white; }
+    .sidebar-panel { display: flex; flex-direction: column; height: 100%; }
+    .sidebar-panel-header {
+        background-color: #064e3b;
+        color: white;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .close-panel { cursor: pointer; background: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+    .room-item { padding: 12px; border-bottom: 1px solid #e5e7eb; cursor: pointer; font-weight: bold; font-size: 13px; }
+    .room-item:hover, .room-item.active { background-color: #dbeafe; color: #1e40af; }
+    .private-chat-link {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        background: white;
+        margin: 5px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+</style>
 
     <div class="paywall-overlay" id="paywall">
         <div class="paywall-box">
@@ -231,5 +324,37 @@
         box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
 </style>
+<!-- نافذة الكارت الشخصي المنبثقة للأعضاء المماثلة للصورة 2 -->
+<div id="user-profile-modal" class="paywall-overlay" style="display: none; z-index: 160;">
+    <div class="paywall-box" style="max-width: 360px; padding: 20px; position: relative;">
+        <!-- زر إغلاق علوي سريع -->
+        <span onclick="closeProfileModal()" style="position: absolute; top: 10px; left: 10px; cursor: pointer; font-size: 16px; color: #9ca3af;">✖</span>
+        
+        <!-- صورة العرض الكبيرة -->
+        <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; margin: 0 auto 10px auto; border: 2px solid #e5e7eb;">
+            <img id="modal-user-avatar" src="" style="width: 100px; height: 100px; object-fit: cover;">
+        </div>
+        
+        <!-- اسم المستخدم والحالة -->
+        <h3 id="modal-user-name" style="margin: 5px 0; color: #1f2937;">اسم العضو</h3>
+        <p id="modal-user-status" style="font-size: 13px; color: #b45309; font-weight: bold; margin: 5px 0;">حيل الجذب قصير 🎀</p>
+        
+        <!-- علم وجنسية الإقامة -->
+        <div style="font-size: 13px; color: #4b5563; margin: 10px 0; display: flex; justify-content: center; align-items: center; gap: 5px;">
+            <span>📍 الإقامة:</span>
+            <span id="modal-user-location" style="font-weight: bold;">العراق 🇮🇶</span>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 15px 0;">
+        
+        <!-- أزرار التفاعل والتحكم بالمشترك -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button onclick="startPrivateFromModal()" style="background-color: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">💬 محادثة خاصة</button>
+            <button onclick="alert('سيتم إضافة نظام التنبيهات لاحقاً')" style="background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">📩 تنبيه</button>
+            <button onclick="alert('سيتم إضافة حظر وتجاهل العضو لاحقاً')" style="background-color: #fee2e2; color: #ef4444; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; grid-column: span 2;">🚫 تجاهل العضو</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

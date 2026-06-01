@@ -117,8 +117,18 @@ socket.on('receiveMessage', (data) => {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
-// استقبال قائمة المتواجدين الحية وتحديث كروت الأعضاء ديناميكياً
+// استقبال قائمة المتواجدين الحية وتحديث كروت الأعضاء ديناميكياً مع العداد السفلي
 socket.on('updateUsersList', (users) => {
+    // 1. تحديث عداد المتواجدين في الزر السفلي تلقائياً
+    const usersCountSpan = document.getElementById('users-count');
+    if (usersCountSpan) {
+        usersCountSpan.textContent = users.length;
+    }
+
+    // 2. تحديث قائمة الأعضاء داخل الحاوية الجديدة في السايدبار
+    const activeUsersList = document.getElementById('active-users-list');
+    if (!activeUsersList) return;
+    
     activeUsersList.innerHTML = ''; // تنظيف القائمة القديمة
     
     users.forEach(user => {
@@ -128,8 +138,8 @@ socket.on('updateUsersList', (users) => {
         // إعداد صورة الملف الشخصي أو الصورة الافتراضية
         const avatarSrc = user.avatar ? user.avatar : 'https://flaticon.com';
         
-        userCard.innerHTML = `
-            <div class="user-header">
+               userCard.innerHTML = `
+            <div class="user-header" style="cursor: pointer;" onclick="showUserProfile('${user.name}', '${avatarSrc}', '${user.location}')">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <img src="${avatarSrc}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
                     <span class="user-name ${user.premium ? 'premium-text' : ''}">${user.name}</span>
@@ -141,9 +151,9 @@ socket.on('updateUsersList', (users) => {
                 <span>🎂 ${user.age} سنة</span> • 
                 <span>📍 ${user.location}</span>
             </div>
-            <button class="private-btn" onclick="openPrivateChat('${user.name}')">🔒 محادثة خاصة</button>
+            <button class="private-btn" onclick="showUserProfile('${user.name}', '${avatarSrc}', '${user.location}')">👁️ عرض الملف الشخصي</button>
         `;
-        
+
         activeUsersList.appendChild(userCard);
     });
 });
@@ -362,3 +372,63 @@ socket.on('receivePrivateImage', (data) => {
     popupMessages.appendChild(otherImgMsg);
     popupMessages.scrollTop = popupMessages.scrollHeight; // تمرير تلقائي لأسفل
 });
+
+// دالة التبديل بين اللوحات الجانبية ديناميكياً بناءً على اختيار الشريط السفلي
+function switchSidebar(panelName) {
+    const sidebar = document.getElementById('dynamic-sidebar');
+    
+    // جلب جميع اللوحات الجانبية المتاحة لتهيئة حالتها
+    const panels = ['panel-users', 'panel-private', 'panel-rooms', 'panel-settings'];
+    
+    // إخفاء كافة اللوحات أولاً لمنع التداخل
+    panels.forEach(id => {
+        const p = document.getElementById(id);
+        if (p) p.style.display = 'none';
+    });
+    
+    // إظهار اللوحة المطلوبة المحددة فقط
+    const targetPanel = document.getElementById(`panel-${panelName}`);
+    if (targetPanel) {
+        targetPanel.style.display = 'flex';
+    }
+    
+    // إظهار السايدبار الرئيسي بالكامل في حال كان مخفياً
+    if (sidebar) {
+        sidebar.style.display = 'block';
+    }
+}
+
+// دالة إغلاق السايدبار الجانبي بالكامل عند الضغط على علامة (✖)
+function closeSidebar() {
+    const sidebar = document.getElementById('dynamic-sidebar');
+    if (sidebar) {
+        sidebar.style.display = 'none';
+    }
+}
+let selectedModalUser = null;
+
+// دالة تفتح الكارت الشخصي المنبثق وتملأ بيانات العضو بالكامل
+function showUserProfile(name, avatar, location) {
+    selectedModalUser = name;
+    
+    document.getElementById('modal-user-name').textContent = name;
+    document.getElementById('modal-user-avatar').src = avatar ? avatar : 'https://flaticon.com';
+    document.getElementById('modal-user-location').textContent = location;
+    
+    // إظهار النافذة
+    document.getElementById('user-profile-modal').style.display = 'flex';
+}
+
+// دالة إغلاق الكارت الشخصي
+function closeProfileModal() {
+    document.getElementById('user-profile-modal').style.display = 'none';
+    selectedModalUser = null;
+}
+
+// زر بدء المحادثة الخاصة من داخل الكارت الشخصي
+function startPrivateFromModal() {
+    if (selectedModalUser) {
+        closeProfileModal();
+        openPrivateChat(selectedModalUser); // استدعاء دالة الخاص التي طورناها
+    }
+}
