@@ -14,6 +14,9 @@ app.use(express.static(__dirname));
 io.on('connection', (socket) => {
     console.log(`مستخدم متصل حالياً برقم معرف: ${socket.id}`);
 
+    // إرسال قائمة الأعضاء الحالية فوراً لأي متصفح يتصل حديثاً قبل الدخول لإنعاش الذاكرة
+    socket.emit('updateUsersList', Object.values(activeUsers));
+
     // 🚪 استقبال طلب التسجيل وفحص تكرار الاسم المستعار
     socket.on('joinChat', (userData) => {
         const nameExists = Object.values(activeUsers).some(user => user.name.toLowerCase() === userData.name.toLowerCase());
@@ -32,6 +35,8 @@ io.on('connection', (socket) => {
             };
 
             socket.emit('loginResponse', { success: true });
+            
+            // بث حي شامل ومباشر لجميع المتصلين لتحديث القائمة فوراً
             io.emit('updateUsersList', Object.values(activeUsers));
             console.log(`✅ انضم ${userData.name} إلى الشات بنجاح.`);
         }
