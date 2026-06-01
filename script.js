@@ -318,13 +318,6 @@ function openPrivateChat(name) {
     }
 }
 
-        
-        // تفريغ حقل الإدخال والتمرير لأسفل
-        popupInput.value = "";
-        popupMessages.scrollTop = popupMessages.scrollHeight;
-    }
-}
-
 // استقبال الرسائل الخاصة الثنائية من السيرفر وعرضها في النافذة المنبثقة
 socket.on('receivePrivateMessage', (data) => {
     // التأكد من أن النافذة مفتوحة حالياً مع نفس الشخص المرسل
