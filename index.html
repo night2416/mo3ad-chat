@@ -8,24 +8,31 @@
         body { margin: 0; font-family: Arial, sans-serif; background-color: #f3f4f6; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         header { background-color: #4f46e5; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         header h1 { margin: 0; font-size: 20px; }
-        .rooms-bar { background-color: #374151; display: flex; gap: 5px; padding: 5px 10px; }
-        .room-tab { color: #d1d5db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.2s; }
-        .room-tab.active { background-color: #4f46e5; color: white; }
-        .room-tab.private-locked { border: 1px dashed #f59e0b; color: #fcd34d; }
-        .main-container { display: flex; flex: 1; overflow: hidden; }
-        .chat-area { flex: 1; display: flex; flex-direction: column; background-color: white; }
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; background-color: white; position: relative; }
         .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .msg { padding: 10px 14px; border-radius: 12px; max-w: 60%; font-size: 14px; line-height: 1.4; display: flex; flex-direction: column; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 60%; font-size: 14px; line-height: 1.4; display: flex; flex-direction: column; }
         .msg-other { background-color: #e5e7eb; color: #1f2937; align-self: flex-start; border-bottom-right-radius: 2px; }
         .msg-me { background-color: #dbeafe; color: #1e40af; align-self: flex-end; border-bottom-left-radius: 2px; }
         .msg-sender { font-size: 11px; font-weight: bold; color: #4f46e5; margin-bottom: 3px; }
         .msg-time { font-size: 10px; color: #9ca3af; text-align: left; margin-top: 4px; }
-        .input-area { padding: 15px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
+        .input-area { padding: 15px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; background-color: white; }
         .input-area input { flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; outline: none; font-size: 14px; }
         .input-area button { background-color: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .sidebar { width: 300px; background-color: #f9fafb; border-right: 1px solid #e5e7eb; overflow-y: auto; display: flex; flex-direction: column; }
-        .sidebar-title { padding: 15px; background-color: #f3f4f6; font-weight: bold; border-bottom: 1px solid #e5e7eb; color: #374151; }
-        .users-list { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* شريط التحكم السفلي الجديد المطور */
+        .footer-control-bar { background-color: #111827; display: flex; justify-content: space-around; padding: 8px; border-top: 1px solid #374151; }
+        .footer-btn { background: none; border: none; color: #d1d5db; font-weight: bold; font-size: 13px; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: background 0.2s; }
+        .footer-btn:hover { background-color: #374151; color: white; }
+        
+        /* السايدبار الديناميكي المقسم */
+        .sidebar { width: 300px; background-color: #f9fafb; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; transition: all 0.3s ease; }
+        .sidebar-panel { display: flex; flex-direction: column; height: 100%; }
+        .sidebar-panel-header { background-color: #064e3b; color: white; padding: 12px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .close-panel { cursor: pointer; background: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: white; }
+        .users-list { padding: 10px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; }
+        
+        /* كروت الأعضاء والتصاميم الملونة */
         .user-card { background-color: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 5px; }
         .user-card.premium { border-color: #fcd34d; background-color: #fffdf5; }
         .user-header { display: flex; justify-content: space-between; align-items: center; }
@@ -35,43 +42,56 @@
         .badge.premium-badge { background-color: #fef3c7; color: #92400e; }
         .user-info { font-size: 12px; color: #6b7280; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
         .private-btn { margin-top: 8px; background-color: #10b981; color: white; border: none; padding: 6px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; width: 100%; text-align: center; }
-        .paywall-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; display: none; }
+        .room-item { padding: 12px; border-bottom: 1px solid #e5e7eb; cursor: pointer; font-weight: bold; font-size: 13px; color: #374151; }
+        .room-item:hover, .room-item.active { background-color: #dbeafe; color: #1e40af; }
+        
+        /* جدار الدفع المنبثق */
+        .paywall-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 500; }
         .paywall-box { background-color: white; padding: 30px; border-radius: 12px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
         .paywall-box h2 { margin-top: 0; color: #4f46e5; }
         .paywall-price { font-size: 24px; font-weight: bold; color: #10b981; margin: 15px 0; }
         .pay-btn { background-color: #f59e0b; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; }
         .close-pay-btn { background-color: #e5e7eb; color: #4b5563; border: none; padding: 8px; border-radius: 6px; margin-top: 10px; cursor: pointer; width: 100%; }
 
-                /* تزيينات شاشة تسجيل الدخول الكاملة الجديدة */
-        .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #4f46e5; display: flex; justify-content: center; align-items: center; z-index: 200; overflow-y: auto; padding: 20px; }
+        /* شاشة تسجيل الدخول المحدثة النظيفة */
+        .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #4f46e5; display: flex; justify-content: center; align-items: center; z-index: 1000; overflow-y: auto; padding: 20px; }
         .login-box { background-color: white; padding: 30px; border-radius: 16px; max-width: 420px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 14px; }
-        .login-box h2 { margin: 0; text-align: center; color: #374151; font-size: 22px; }
         .form-group { display: flex; flex-direction: column; gap: 5px; }
         .form-group label { font-size: 13px; font-weight: bold; color: #4b5563; }
         .form-group input, .form-group select { padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; }
-        .form-group input:focus, .form-group select:focus { border-color: #4f46e5; }
         .gender-group { display: flex; gap: 15px; margin-top: 5px; }
-        .gender-option { flex: 1; text-align: center; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s; background-color: #f9fafb; }
+        .gender-option { flex: 1; text-align: center; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; background-color: #f9fafb; transition: all 0.2s; }
         .gender-option.selected-male { background-color: #dbeafe; color: #1e40af; border-color: #3b82f6; }
         .gender-option.selected-female { background-color: #fce7f3; color: #9d174d; border-color: #ec4899; }
         .avatar-preview { width: 80px; height: 80px; border-radius: 50%; background-color: #e5e7eb; margin: 0 auto; display: flex; justify-content: center; align-items: center; border: 2px dashed #9ca3af; overflow: hidden; position: relative; }
         .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
-        .login-btn { background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; transition: background 0.2s; }
-        .login-btn:hover { background-color: #059669; }
+        .login-btn { background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .error-msg { color: #ef4444; font-size: 13px; font-weight: bold; text-align: center; display: none; background-color: #fee2e2; padding: 8px; border-radius: 6px; border: 1px solid #fca5a5; }
+
+        /* صندوق الخاص العائم الذكي المطور */
+        .private-popup { position: fixed; bottom: 20px; left: 20px; width: 320px; height: 420px; background-color: white; border-radius: 12px 12px 0 0; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 400; border: 1px solid #e5e7eb; transition: all 0.3s ease; }
+        .private-popup.maximized { width: 640px; height: 600px; }
+        .popup-header { background-color: #10b981; color: white; padding: 10px 15px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .popup-user-info { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 14px; }
+        .popup-controls { display: flex; gap: 8px; }
+        .popup-controls button { background: none; border: none; color: white; cursor: pointer; font-size: 14px; }
+        .popup-messages-area { flex: 1; padding: 15px; overflow-y: auto; background-color: #f9fafb; display: flex; flex-direction: column; gap: 10px; }
+        .popup-input-area { padding: 10px; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; background-color: white; align-items: center; }
+        .popup-input-area input { flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 20px; outline: none; font-size: 13px; }
+        .popup-shared-img { max-width: 100%; max-height: 180px; border-radius: 8px; margin-top: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
+    <!-- 🔑 شاشة الدخول -->
     <div class="login-overlay" id="login-screen">
         <div class="login-box">
             <h2>👋 أهلاً بك في شات موعد</h2>
-            <p style="text-align: center; color: #6b7280; font-size: 13px; margin: 0;">يرجى ملء بياناتك الشخصية للتعارف والدخول إلى الدردشة الحية</p>
-            
-            <div class="error-msg" id="login-error">هذا الاسم مستخدم حالياً، يرجى اختيار اسم آخر!</div>
+            <p style="text-align: center; color: #6b7280; font-size: 13px; margin: 0;">يرجى ملء بياناتك الدقيقة للدخول إلى المحادثة الفورية</p>
+            <div class="error-msg" id="login-error">هذا الاسم مستخدم حالياً!</div>
 
             <div class="form-group">
-                <label>صورة الملف الشخصي (اختياري)</label>
+                <label>صورة الملف الشخصي</label>
                 <div class="avatar-preview" id="avatar-preview-box">
                     <span id="avatar-placeholder" style="font-size: 24px; color: #9ca3af;">👤</span>
                     <img id="avatar-img" src="" style="display: none;">
@@ -81,7 +101,7 @@
             </div>
 
             <div class="form-group">
-                <label>الاسم المستعار أو الحقيقي</label>
+                <label>الاسم المستعار</label>
                 <input type="text" id="reg-name" placeholder="اكتب اسمك هنا..." required>
             </div>
 
@@ -95,20 +115,17 @@
 
             <div class="form-group">
                 <label>العمر</label>
-                <input type="number" id="reg-age" placeholder="مثال: 25" min="18" max="99" required>
+                <input type="number" id="reg-age" placeholder="مثال: 25">
             </div>
 
             <div class="form-group">
-                <label>محل السكن أو الإقامة</label>
+                <label>محل الإقامة</label>
                 <select id="reg-location">
                     <option value="بغداد">بغداد</option>
                     <option value="أربيل">أربيل</option>
                     <option value="البصرة">البصرة</option>
-                    <option value="الموصل">الموصل</option>
                     <option value="النجف">النجف</option>
                     <option value="كربلاء">كربلاء</option>
-                    <option value="السليمانية">السليمانية</option>
-                    <option value="كركوك">كركوك</option>
                 </select>
             </div>
 
@@ -116,245 +133,107 @@
         </div>
     </div>
 
+    <!-- 📺 واجهة الدردشة الرئيسية -->
     <header>
-        <h1>💬 شات موعد</h1>
-        <div id="user-status-badge" style="background-color: #ef4444; font-size: 12px; padding: 4px 8px; border-radius: 9999px; color: white; font-weight: bold;">حساب مجاني (غير مشترك)</div>
+        <h1>💬 شات موعد المطور</h1>
+        <div id="user-status-badge" style="font-size: 12px; font-weight: bold; background-color: #9ca3af; color: white; padding: 5px 12px; border-radius: 20px;">
+            حساب مجاني (محدود)
+        </div>
     </header>
 
-    <div class="rooms-bar">
-        <div class="room-tab active" id="tab-public" onclick="switchRoom('public')">🏠 الغرفة العامة</div>
-        <div class="room-tab private-locked" id="tab-private" onclick="switchRoom('private')">🔒 الغرفة الخاصة (مشتركين فقط ✨)</div>
-    </div>
-
-   <!-- حاوية الشات الرئيسية المحدثة -->
-<div class="main-container">
-    <div class="chat-area">
-        <div class="messages" id="chat-messages">
-            <!-- الرسائل العامة تظهر هنا -->
-        </div>
-        
-        <!-- منطقة الإدخال العامة -->
-        <div class="input-area">
-            <input type="text" id="msg-input" placeholder="اكتب رسالتك هنا...">
-            <button id="send-btn">إرسال</button>
-        </div>
-        
-        <!-- 🏪 شريط الأزرار السفلي الثابت الجديد المماثل للصور -->
-        <div class="footer-control-bar">
-            <button class="footer-btn" onclick="switchSidebar('users')">👥 المتواجدون (<span id="users-count">0</span>)</button>
-            <button class="footer-btn" onclick="switchSidebar('private')">💬 خاص</button>
-            <button class="footer-btn" onclick="switchSidebar('rooms')">🏢 الغرف</button>
-            <button class="footer-btn" onclick="switchSidebar('settings')">⚙️ الضبط</button>
-        </div>
-    </div>
-
-    <!-- السايدبار الجانبي الديناميكي المتغير -->
-    <div class="sidebar" id="dynamic-sidebar">
-        <!-- 1. واجهة المتواجدين -->
-        <div id="panel-users" class="sidebar-panel">
-            <div class="sidebar-panel-header">🟢 المتواجدون <span class="close-panel" onclick="closeSidebar()">✖</span></div>
-            <div class="users-list" id="active-users-list"></div>
-        </div>
-
-        <!-- 2. واجهة المحادثات الخاصة النشطة -->
-        <div id="panel-private" class="sidebar-panel" style="display: none;">
-            <div class="sidebar-panel-header">🔒 المحادثات الخاصة <span class="close-panel" onclick="closeSidebar()">✖</span></div>
-            <div class="users-list" id="active-private-chats">
-                <!-- قائمة بأسماء الأشخاص الذين كلمتهم خاص مع زر حذف -->
+    <div class="main-container">
+        <div class="chat-area">
+            <div class="messages" id="chat-messages">
+                <div class="msg msg-other">
+                    <span class="msg-sender">نظام شات موعد</span>
+                    <span>مرحباً بك في الغرفة العامة 1. يرجى تفعيل الاشتراك المجاني التجريبي لدخول الخاص وتبادل الصور!</span>
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="msg-input" placeholder="اكتب رسالة عامة...">
+                <button id="send-btn" onclick="handleSend()">إرسال</button>
+            </div>
+            
+            <!-- 🏪 الشريط السفلي المطور الثابت المماثل لصورك -->
+            <div class="footer-control-bar">
+                <button class="footer-btn" onclick="switchSidebar('users')">👥 المتواجدون (<span id="users-count">0</span>)</button>
+                <button class="footer-btn" onclick="switchSidebar('rooms')">🏢 الغرف</button>
+                <button class="footer-btn" onclick="switchSidebar('paywall')">💳 تفعيل المتميز</button>
             </div>
         </div>
 
-        <!-- 3. واجهة قائمة الغرف -->
-        <div id="panel-rooms" class="sidebar-panel" style="display: none;">
-            <div class="sidebar-panel-header">🏢 غرف الدردشة العامة <span class="close-panel" onclick="closeSidebar()">✖</span></div>
-            <div class="rooms-list-container">
-                <div class="room-item active" onclick="changePublicRoom('الغرفة العامة 1')">🏠 الغرفة العامة (1)</div>
-                <div class="room-item" onclick="changePublicRoom('غرفة بنوتة 2')">🎀 غرفة بنوتة (2)</div>
-                <div class="room-item" onclick="changePublicRoom('غرفة الشباب 3')">☕ غرفة الشباب (3)</div>
+        <!-- 🔀 السايدبار الديناميكي المتغير -->
+        <div class="sidebar" id="dynamic-sidebar">
+            <!-- قائمة المتواجدون -->
+            <div id="panel-users" class="sidebar-panel">
+                <div class="sidebar-panel-header">🟢 المتواجدون حالياً <span class="close-panel" onclick="closeSidebar()">✖</span></div>
+                <div class="users-list" id="active-users-list"></div>
             </div>
-        </div>
 
-        <!-- 4. واجهة الضبط والإعدادات -->
-        <div id="panel-settings" class="sidebar-panel" style="display: none;">
-            <div class="sidebar-panel-header">⚙️ إعدادات الحساب <span class="close-panel" onclick="closeSidebar()">✖</span></div>
-            <div class="settings-form" style="padding: 15px; display: flex; flex-direction: column; gap: 10px;">
-                <label style="font-weight: bold; font-size: 13px;">الحالة الشخصية:</label>
-                <input type="text" id="status-input" placeholder="اكتب حالتك هنا..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
-                <button onclick="saveStatus()" style="background-color: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ التغييرات</button>
+            <!-- قائمة الغرف العامة -->
+            <div id="panel-rooms" class="sidebar-panel" style="display: none;">
+                <div class="sidebar-panel-header">🏢 غرف الدردشة العامة <span class="close-panel" onclick="closeSidebar()">✖</span></div>
+                <div class="room-item active">🏠 الغرفة العامة (1)</div>
+                <div class="room-item" onclick="alert('سيتم فتح بقية الغرف بالنسخة النهائية')">🎀 غرفة بنوتة (2)</div>
+                <div class="room-item" onclick="alert('سيتم فتح بقية الغرف بالنسخة النهائية')">☕ غرفة الشباب (3)</div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- التنسيقات الجديدة للشريط السفلي والقوائم الديناميكية الجانبية -->
-<style>
-    .footer-control-bar {
-        background-color: #111827;
-        display: flex;
-        justify-content: space-around;
-        padding: 8px;
-        border-top: 1px solid #374151;
-    }
-    .footer-btn {
-        background: none;
-        border: none;
-        color: #d1d5db;
-        font-weight: bold;
-        font-size: 13px;
-        cursor: pointer;
-        padding: 6px 12px;
-        border-radius: 6px;
-        transition: background 0.2s;
-    }
-    .footer-btn:hover { background-color: #374151; color: white; }
-    .sidebar-panel { display: flex; flex-direction: column; height: 100%; }
-    .sidebar-panel-header {
-        background-color: #064e3b;
-        color: white;
-        padding: 12px;
-        font-weight: bold;
-        font-size: 14px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .close-panel { cursor: pointer; background: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
-    .room-item { padding: 12px; border-bottom: 1px solid #e5e7eb; cursor: pointer; font-weight: bold; font-size: 13px; }
-    .room-item:hover, .room-item.active { background-color: #dbeafe; color: #1e40af; }
-    .private-chat-link {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        border-bottom: 1px solid #e5e7eb;
-        background: white;
-        margin: 5px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-</style>
+    <!-- 🔒 صندوق الخاص المطور العائم (الدبوس 📎 والتكبير 🔲) -->
+    <div id="private-chat-window" class="private-popup" style="display: none;">
+        <div class="popup-header">
+            <div class="popup-user-info">
+                <span>🟢</span>
+                <span id="popup-target-name">اسم العضو</span>
+            </div>
+            <div class="popup-controls">
+                <button id="popup-maximize-btn" onclick="toggleMaximizePopup()">🔲</button>
+                <button onclick="closePrivatePopup()">❌</button>
+            </div>
+        </div>
+        <div id="popup-messages" class="popup-messages-area"></div>
+        <div class="popup-input-area">
+            <button id="popup-pin-btn" type="button" onclick="triggerPopupFile()">📎</button>
+            <input type="file" id="popup-file-input" accept="image/*" style="display: none;" onchange="handlePopupImage(event)">
+            <input type="text" id="popup-msg-input" placeholder="اكتب رسالة خاصة سرية..." onkeypress="handlePopupKey(event)">
+            <button id="popup-send-btn" onclick="sendPopupMessage()">إرسال</button>
+        </div>
+    </div>
 
-    <div class="paywall-overlay" id="paywall">
+    <!-- 👑 جدار الدفع المنبثق -->
+    <div class="paywall-overlay" id="paywall" style="display: none;">
         <div class="paywall-box">
             <h2>✨ اشترك في الباقة المميزة</h2>
-            <p>الغرف الخاصة والمحادثات السرية لا يمكن دخولها إلا للمشتركين لضمان الخصوصية الجادة.</p>
+            <p>المحادثات الخاصة وتبادل الصور السرية مخصصة للأعضاء المشتركين فقط لضمان الجدية والأمان التام.</p>
             <div class="paywall-price">9.99$ / شهرياً</div>
-            <button class="pay-btn" onclick="simulatePayment()">💳 تفعيل الاشتراك الفوري (تجريبي)</button>
+            <button class="pay-btn" onclick="simulatePayment()">💳 تفعيل الاشتراك التجريبي الفوري (مجاناً)</button>
             <button class="close-pay-btn" onclick="closePaywall()">إغلاق</button>
         </div>
     </div>
 
+    <!-- 👁️ كارت الملف الشخصي المنبثق (المماثل للصورة 2) -->
+    <div id="user-profile-modal" class="paywall-overlay" style="display: none; z-index: 600;">
+        <div class="paywall-box" style="max-width: 340px; padding: 20px; position: relative;">
+            <span onclick="closeProfileModal()" style="position: absolute; top: 10px; left: 10px; cursor: pointer; font-size: 16px; color: #9ca3af;">✖</span>
+            <div style="width: 90px; height: 90px; border-radius: 50%; overflow: hidden; margin: 0 auto 10px auto; border: 2px solid #e5e7eb;">
+                <img id="modal-user-avatar" src="" style="width: 90px; height: 90px; object-fit: cover;">
+            </div>
+            <h3 id="modal-user-name" style="margin: 5px 0;">اسم العضو</h3>
+            <p style="font-size: 13px; color: #b45309; font-weight: bold; margin: 5px 0;">🎀 متصل حالياً في شات موعد</p>
+            <div style="font-size: 13px; color: #4b5563; margin: 10px 0;">
+                <span>📍 الإقامة:</span> <span id="modal-user-location" style="font-weight: bold;">العراق</span>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 15px 0;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button onclick="startPrivateFromModal()" style="background-color: #10b981; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">💬 محادثة خاصة</button>
+                <button onclick="closeProfileModal()" style="background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px;">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ربط السوكت والسكربت الأساسي المكتمل -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
-    <!-- صندوق المحادثة الخاصة المنبثق الذكي -->
-<div id="private-chat-window" class="private-popup" style="display: none;">
-    <div class="popup-header">
-        <div class="popup-user-info">
-            <span class="popup-dot">🟢</span>
-            <span id="popup-target-name">اسم المستخدم</span>
-        </div>
-        <div class="popup-controls">
-            <!-- زر التكبير والتصغير المزدوج -->
-            <button id="popup-maximize-btn" onclick="toggleMaximizePopup()">🔲</button>
-            <!-- زر الإغلاق -->
-            <button onclick="closePrivatePopup()">❌</button>
-        </div>
-    </div>
-    
-    <!-- منطقة عرض رسائل الخاص والصور المتبادلة -->
-    <div id="popup-messages" class="popup-messages-area"></div>
-    
-    <!-- صندوق الإدخال المطور مع أيقونة الدبوس المخصصة للصور -->
-    <div class="popup-input-area">
-        <button id="popup-pin-btn" type="button" onclick="triggerPopupFile()">📎</button>
-        <input type="file" id="popup-file-input" accept="image/*" style="display: none;" onchange="handlePopupImage(event)">
-        
-        <input type="text" id="popup-msg-input" placeholder="اكتب رسالة خاصة سرية..." onkeypress="handlePopupKey(event)">
-        <button id="popup-send-btn" onclick="sendPopupMessage()">إرسال</button>
-    </div>
-</div>
-
-<!-- التنسيقات الخاصة بالشاشة المنبثقة والتحكم بأبعادها وتكبيرها -->
-<style>
-    .private-popup {
-        position: fixed;
-        bottom: 20px;
-        left: 20px; /* تظهر في الزاوية السفلى المعاكسة للقائمة الجانبية */
-        width: 320px;
-        height: 420px;
-        background-color: white;
-        border-radius: 12px 12px 0 0;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-        display: flex;
-        flex-direction: column;
-        z-index: 90;
-        transition: all 0.3s ease;
-        border: 1px solid #e5e7eb;
-    }
-    /* ستايل التكبير المخصص لمضاعفة الحجم */
-    .private-popup.maximized {
-        width: 640px; /* ضعف الحجم الأصلي */
-        height: 600px;
-    }
-    .popup-header {
-        background-color: #10b981; /* لون أخضر مميز للخاص */
-        color: white;
-        padding: 10px 15px;
-        border-radius: 12px 12px 0 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-    }
-    .popup-user-info { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 14px; }
-    .popup-controls { display: flex; gap: 8px; }
-    .popup-controls button { background: none; border: none; color: white; cursor: pointer; font-size: 14px; padding: 2px; }
-    .popup-messages-area { flex: 1; padding: 15px; overflow-y: auto; background-color: #f9fafb; display: flex; flex-direction: column; gap: 10px; }
-    .popup-input-area { padding: 10px; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; background-color: white; align-items: center; }
-    .popup-input-area input { flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 20px; outline: none; font-size: 13px; }
-    #popup-pin-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 4px; }
-    #popup-send-btn { background-color: #10b981; color: white; border: none; padding: 7px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px; }
-    
-    /* تنسيق الصور المرفقة داخل صندوق الخاص الجديد */
-    .popup-shared-img {
-        max-width: 100%;
-        max-height: 180px;
-        border-radius: 8px;
-        margin-top: 4px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-</style>
-<!-- نافذة الكارت الشخصي المنبثقة للأعضاء المماثلة للصورة 2 -->
-<div id="user-profile-modal" class="paywall-overlay" style="display: none; z-index: 160;">
-    <div class="paywall-box" style="max-width: 360px; padding: 20px; position: relative;">
-        <!-- زر إغلاق علوي سريع -->
-        <span onclick="closeProfileModal()" style="position: absolute; top: 10px; left: 10px; cursor: pointer; font-size: 16px; color: #9ca3af;">✖</span>
-        
-        <!-- صورة العرض الكبيرة -->
-        <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; margin: 0 auto 10px auto; border: 2px solid #e5e7eb;">
-            <img id="modal-user-avatar" src="" style="width: 100px; height: 100px; object-fit: cover;">
-        </div>
-        
-        <!-- اسم المستخدم والحالة -->
-        <h3 id="modal-user-name" style="margin: 5px 0; color: #1f2937;">اسم العضو</h3>
-        <p id="modal-user-status" style="font-size: 13px; color: #b45309; font-weight: bold; margin: 5px 0;">حيل الجذب قصير 🎀</p>
-        
-        <!-- علم وجنسية الإقامة -->
-        <div style="font-size: 13px; color: #4b5563; margin: 10px 0; display: flex; justify-content: center; align-items: center; gap: 5px;">
-            <span>📍 الإقامة:</span>
-            <span id="modal-user-location" style="font-weight: bold;">العراق 🇮🇶</span>
-        </div>
-        
-        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 15px 0;">
-        
-        <!-- أزرار التفاعل والتحكم بالمشترك -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <button onclick="startPrivateFromModal()" style="background-color: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">💬 محادثة خاصة</button>
-            <button onclick="alert('سيتم إضافة نظام التنبيهات لاحقاً')" style="background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">📩 تنبيه</button>
-            <button onclick="alert('سيتم إضافة حظر وتجاهل العضو لاحقاً')" style="background-color: #fee2e2; color: #ef4444; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; grid-column: span 2;">🚫 تجاهل العضو</button>
-        </div>
-    </div>
-</div>
-
 </body>
 </html>
