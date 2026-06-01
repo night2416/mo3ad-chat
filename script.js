@@ -160,21 +160,26 @@ socket.on('updateUsersList', (users) => {
 
 function switchRoom(room) {
     if (room === 'private' && !isSubscribed) {
-        paywall.style.display = 'flex';
+        const paywall = document.getElementById('paywall');
+        if (paywall) paywall.style.display = 'flex';
         return;
     }
     currentRoom = room;
+    
+    const tabPublic = document.getElementById('tab-public');
+    const tabPrivate = document.getElementById('tab-private');
+    
     if (room === 'public') {
-        tabPublic.classList.add('active');
-        tabPrivate.classList.remove('active');
+        if (tabPublic) tabPublic.classList.add('active');
+        if (tabPrivate) tabPrivate.classList.remove('active');
         messagesContainer.innerHTML = `
             <div class="msg msg-other">
                 <span class="msg-sender">نظام شات موعد</span>
                 <span>لقد انتقلت إلى الغرفة العامة الآن.</span>
             </div>`;
     } else {
-        tabPrivate.classList.add('active');
-        tabPublic.classList.remove('active');
+        if (tabPrivate) tabPrivate.classList.add('active');
+        if (tabPublic) tabPublic.classList.remove('active');
         messagesContainer.innerHTML = `
             <div class="msg msg-other" style="background-color: #fffbeb; border: 1px solid #fef3c7;">
                 <span class="msg-sender" style="color: #b45309;">✨ الغرفة الخاصة الرومانسية ✨</span>
@@ -292,15 +297,27 @@ function sendPopupMessage() {
         
         // تفريغ حقل الإدخال
         popupInput.value = "";
+   }
+
+function openPrivateChat(name) {
+    if (name === myProfile.name) {
+        alert("لا يمكنك فتح محادثة خاصة مع نفسك!");
+        return;
+    }
+    if (!isSubscribed) {
+        const paywall = document.getElementById('paywall');
+        if (paywall) paywall.style.display = 'flex';
+    } else {
+        currentPrivateTarget = name;
+        const popup = document.getElementById('private-chat-window');
+        const popupTitle = document.getElementById('popup-target-name');
+        const popupMessages = document.getElementById('popup-messages');
+        if (popupTitle) popupTitle.textContent = name;
+        if (popupMessages) popupMessages.innerHTML = '';
+        if (popup) popup.style.display = 'flex';
     }
 }
-        
-        // عرض الرسالة فوراً في صندوق الخاص بي (كمرسل)
-        const popupMessages = document.getElementById('popup-messages');
-        const myMsg = document.createElement('div');
-        myMsg.className = 'msg msg-me';
-        myMsg.innerHTML = `<span>${text}</span><span class="msg-time">الآن</span>`;
-        popupMessages.appendChild(myMsg);
+
         
         // تفريغ حقل الإدخال والتمرير لأسفل
         popupInput.value = "";
